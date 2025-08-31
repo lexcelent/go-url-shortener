@@ -32,16 +32,38 @@ func UrlShort(w http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	newUrl := services.Short()
+	// Работа с бизнес логикой
+	id := services.Register(msg.Url)
 
+	// Ответ
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"url": newUrl,
+		"id": id,
 	})
 }
 
-// TODO: Handle redirect
-// TODO: redirect logic
+func UrlRedirect(w http.ResponseWriter, req *http.Request) {
+	// Валидация
+	if req.Method != http.MethodGet {
+		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+		return
+	}
 
-// TODO: move structs to internal/domain/model
+	// Работа с запросом
+	idStr := req.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "Ресурс не найден", http.StatusNotFound)
+		return
+	}
+
+	// Бизнес логика
+	foundUrl := services.Find(idStr)
+	if foundUrl == nil {
+		http.Error(w, "Ресурс не найден", http.StatusNotFound)
+		return
+	}
+
+	http.Redirect(w, req, foundUrl.GetOldUrl(), http.StatusFound)
+}
+
 // TODO: make ENV

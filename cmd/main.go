@@ -14,6 +14,7 @@ func main() {
 	router.Handle("/api/health", httprest.HealthHandler)
 	router.Handle("/dummy", httprest.DummyHandler)
 	router.Handle("/url", httprest.UrlShort)
+	router.Handle("/", httprest.UrlRedirect)
 
 	fmt.Printf("Сервер запущен\n")
 	if err := http.ListenAndServe(":8080", router); err != nil {

@@ -9,13 +9,48 @@ import (
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const URL = "http://localhost:8080"
 
-func Short() string {
-	url := fmt.Sprintf("%s/r/%s", URL, generateUrl(6))
+type UrlData struct {
+	id  string
+	url string
+}
+
+func NewUrlData(id, url string) UrlData {
+	return UrlData{id, url}
+}
+
+// Вместо БД
+var Urls = []UrlData{}
+
+func Find(s string) *UrlData {
+	for _, data := range Urls {
+		if data.id == s {
+			return &data
+		}
+	}
+
+	return nil
+}
+
+// Получаем URL, генерируем ID и добавляем в БД
+func Register(s string) string {
+	id := generateId(6)
+
+	Urls = append(Urls, NewUrlData(id, s))
+
+	return id
+}
+
+func (u *UrlData) GetOldUrl() string {
+	return u.url
+}
+
+func (u *UrlData) BuildShortUrl() string {
+	url := fmt.Sprintf("%s/?id=%s", URL, u.id)
 
 	return url
 }
 
-func generateUrl(length int) string {
+func generateId(length int) string {
 	var sb strings.Builder
 	sb.Grow(length)
 
